@@ -68,7 +68,7 @@ jobs:
             fi
             
             cd /tmp
-            git clone https://github.com/freewind2026/RequirementManager.git temp_repo
+            git clone https://${{ secrets.GH_PAT }}@github.com/freewind2026/RequirementManager.git temp_repo
             cp -r temp_repo/backend $PROJECT_DIR/
             cp -r temp_repo/frontend/dist $PROJECT_DIR/frontend_dist
             rm -rf temp_repo
