@@ -49,41 +49,39 @@ jobs:
           name: frontend-build
           path: frontend/dist
 
-      - name: Deploy to Aliyun ECS (RAM User)
-        uses: appleboy/ssh-action@v1.1.0
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
         with:
-          host: ${{ secrets.ALIYUN_ECS_HOST }}
-          username: ${{ secrets.ALIYUN_RAM_USERNAME }}
-          key: ${{ secrets.ALIYUN_RAM_SSH_KEY }}
-          port: ${{ secrets.ALIYUN_ECS_PORT || 22 }}
-          envs: |
-            MYSQL_PASSWORD=${{ secrets.MYSQL_PASSWORD }}
+          aws-access-key-id: ${{ secrets.ALIYUN_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.ALIYUN_ACCESS_KEY_SECRET }}
+          aws-region: ${{ secrets.ALIYUN_REGION }}
+
+      - name: Deploy to Aliyun ECS
+        uses: aliyun/ecs-deploy@v1
+        with:
+          access-key-id: ${{ secrets.ALIYUN_ACCESS_KEY_ID }}
+          access-key-secret: ${{ secrets.ALIYUN_ACCESS_KEY_SECRET }}
+          region-id: ${{ secrets.ALIYUN_REGION }}
+          instance-id: ${{ secrets.ALIYUN_INSTANCE_ID }}
           script: |
             set -e
             
-            # 项目目录
             PROJECT_DIR="/www/wwwroot/requirement_manager"
-            
-            # 创建项目目录（如果不存在）
             mkdir -p $PROJECT_DIR
             
-            # 备份旧版本
             if [ -d "$PROJECT_DIR/backend" ]; then
               mv $PROJECT_DIR $PROJECT_DIR.backup.$(date +%Y%m%d_%H%M%S)
               mkdir -p $PROJECT_DIR
             fi
             
-            # 复制代码到服务器
             cd /tmp
             git clone https://github.com/freewind2026/RequirementManager.git temp_repo
             cp -r temp_repo/backend $PROJECT_DIR/
             cp -r temp_repo/frontend/dist $PROJECT_DIR/frontend_dist
             rm -rf temp_repo
             
-            # 进入项目目录
             cd $PROJECT_DIR
             
-            # 安装Python依赖
             if [ ! -d "venv" ]; then
               python3 -m venv venv
             fi
@@ -91,24 +89,17 @@ jobs:
             pip install --upgrade pip
             pip install django djangorestframework djangorestframework-simplejwt django-cors-headers mysqlclient
             
-            # 配置数据库连接
             cd backend
-            echo "DATABASES = {'default': {'ENGINE': 'django.db.backends.mysql', 'NAME': 'requirement_manager', 'USER': 'root', 'PASSWORD': '$MYSQL_PASSWORD', 'HOST': 'localhost', 'PORT': '3306', 'OPTIONS': {'charset': 'utf8mb4'}}}" > requirement_manager/local_settings.py
+            echo "DATABASES = {'default': {'ENGINE': 'django.db.backends.mysql', 'NAME': 'requirement_manager', 'USER': 'root', 'PASSWORD': '${{ secrets.MYSQL_PASSWORD }}', 'HOST': 'localhost', 'PORT': '3306', 'OPTIONS': {'charset': 'utf8mb4'}}}" > requirement_manager/local_settings.py
             
-            # 执行数据库迁移
             python manage.py migrate
-            
-            # 收集静态文件
             python manage.py collectstatic --noinput
             
-            # 复制前端构建文件
             rm -rf static/*
             cp -r ../frontend_dist/* static/
             
-            # 设置文件权限
             chown -R www-data:www-data $PROJECT_DIR
             
-            # 重启Gunicorn服务
             if [ -f "/etc/systemd/system/requirement_manager.service" ]; then
               systemctl daemon-reload
               systemctl restart requirement_manager
@@ -116,7 +107,6 @@ jobs:
               echo "Service file not found, please create it manually"
             fi
             
-            # 重启Nginx
             systemctl restart nginx
             
             echo "Deployment completed successfully!"
