@@ -45,6 +45,14 @@ export interface Requirement {
   updated_at: string
 }
 
+export interface RequirementCreate {
+  title: string
+  description: string | null
+  priority: 'low' | 'medium' | 'high' | 'critical'
+  status: 'pending' | 'in_progress' | 'review' | 'completed'
+  project_id: number
+}
+
 export interface Design {
   id: number
   title: string

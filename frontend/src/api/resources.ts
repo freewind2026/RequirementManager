@@ -1,5 +1,5 @@
 import api from './axios'
-import type { Requirement, Design, DesignCreate, Code, CodeCreate, Change } from './types'
+import type { Requirement, RequirementCreate, Design, DesignCreate, Code, CodeCreate, Change } from './types'
 
 export const getRequirements = async (): Promise<Requirement[]> => {
   const response = await api.get('requirements/')
@@ -11,7 +11,7 @@ export const getRequirement = async (id: number): Promise<Requirement> => {
   return response.data
 }
 
-export const createRequirement = async (requirement: Omit<Requirement, 'id' | 'created_by' | 'created_at' | 'updated_at'>): Promise<Requirement> => {
+export const createRequirement = async (requirement: RequirementCreate): Promise<Requirement> => {
   const response = await api.post('requirements/', requirement)
   return response.data
 }

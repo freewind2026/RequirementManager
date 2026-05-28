@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Plus, Edit, Trash2, Search, ListTodo, ChevronRight } from 'lucide-react'
+import { Plus, Edit, Trash2, Search, ListTodo } from 'lucide-react'
 import { getRequirements, createRequirement, updateRequirement, deleteRequirement } from '@/api/resources'
 import { getProjects } from '@/api/projects'
 import type { Requirement } from '@/api/types'
@@ -123,13 +123,6 @@ export const RequirementPage = () => {
     medium: '中',
     high: '高',
     critical: '紧急',
-  }
-
-  const statusColors: Record<string, string> = {
-    pending: 'bg-gray-100 text-gray-600',
-    in_progress: 'bg-blue-100 text-blue-600',
-    review: 'bg-yellow-100 text-yellow-600',
-    completed: 'bg-green-100 text-green-600',
   }
 
   const priorityColors: Record<string, string> = {
