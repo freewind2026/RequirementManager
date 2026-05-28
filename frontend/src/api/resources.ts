@@ -1,5 +1,5 @@
 import api from './axios'
-import type { Requirement, Design, Code, Change } from './types'
+import type { Requirement, Design, DesignCreate, Code, CodeCreate, Change } from './types'
 
 export const getRequirements = async (): Promise<Requirement[]> => {
   const response = await api.get('requirements/')
@@ -35,7 +35,7 @@ export const getDesign = async (id: number): Promise<Design> => {
   return response.data
 }
 
-export const createDesign = async (design: Omit<Design, 'id' | 'created_by' | 'created_at' | 'updated_at'>): Promise<Design> => {
+export const createDesign = async (design: DesignCreate): Promise<Design> => {
   const response = await api.post('designs/', design)
   return response.data
 }
@@ -59,7 +59,7 @@ export const getCode = async (id: number): Promise<Code> => {
   return response.data
 }
 
-export const createCode = async (code: Omit<Code, 'id' | 'created_by' | 'created_at' | 'updated_at'>): Promise<Code> => {
+export const createCode = async (code: CodeCreate): Promise<Code> => {
   const response = await api.post('codes/', code)
   return response.data
 }

@@ -1,3 +1,11 @@
+export interface User {
+  id: number
+  username: string
+  email: string
+  role: 'admin' | 'manager' | 'developer'
+  created_at: string
+}
+
 export interface Project {
   id: number
   name: string
@@ -17,6 +25,12 @@ export interface ProjectGroup {
   member_count: number
   created_at: string
   updated_at: string
+}
+
+export interface ProjectGroupCreate {
+  name: string
+  description: string | null
+  project_id: number
 }
 
 export interface Requirement {
@@ -42,6 +56,13 @@ export interface Design {
   updated_at: string
 }
 
+export interface DesignCreate {
+  title: string
+  content: string | null
+  file_url: string | null
+  project_id: number
+}
+
 export interface Code {
   id: number
   title: string
@@ -52,6 +73,14 @@ export interface Code {
   created_by: User
   created_at: string
   updated_at: string
+}
+
+export interface CodeCreate {
+  title: string
+  content: string | null
+  branch: string
+  commit_hash: string | null
+  project_id: number
 }
 
 export interface Change {

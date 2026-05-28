@@ -1,5 +1,5 @@
 import api from './axios'
-import type { Project, ProjectGroup } from './types'
+import type { Project, ProjectGroup, ProjectGroupCreate } from './types'
 
 export const getProjects = async (): Promise<Project[]> => {
   const response = await api.get('projects/')
@@ -35,7 +35,7 @@ export const getProjectGroup = async (id: number): Promise<ProjectGroup> => {
   return response.data
 }
 
-export const createProjectGroup = async (group: Omit<ProjectGroup, 'id' | 'created_by' | 'created_at' | 'updated_at' | 'member_count'>): Promise<ProjectGroup> => {
+export const createProjectGroup = async (group: ProjectGroupCreate): Promise<ProjectGroup> => {
   const response = await api.post('project-groups/', group)
   return response.data
 }
