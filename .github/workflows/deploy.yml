@@ -56,146 +56,81 @@ jobs:
           username: ${{ secrets.ALIYUN_RAM_USERNAME }}
           key: ${{ secrets.ALIYUN_RAM_SSH_KEY }}
           port: ${{ secrets.ALIYUN_ECS_PORT || 22 }}
+          envs: |
+            MYSQL_PASSWORD=${{ secrets.MYSQL_PASSWORD }}
           script: |
             set -e
             
-            # RAM子账户需要切换到root执行部署操作
-            if [ "$USER" != "root" ]; then
-              echo "Switching to root user for deployment..."
-              exec sudo -i bash -c "$(cat << 'SUDO_SCRIPT'
-                set -e
-                
-                # 项目目录
-                PROJECT_DIR="/www/wwwroot/requirement_manager"
-                
-                # 创建项目目录（如果不存在）
-                mkdir -p $PROJECT_DIR
-                
-                # 备份旧版本
-                if [ -d "$PROJECT_DIR/backend" ]; then
-                  mv $PROJECT_DIR $PROJECT_DIR.backup.$(date +%Y%m%d_%H%M%S)
-                  mkdir -p $PROJECT_DIR
-                fi
-                
-                # 复制代码到服务器
-                cd /tmp
-                git clone https://github.com/freewind2026/RequirementManager.git temp_repo
-                cp -r temp_repo/backend $PROJECT_DIR/
-                cp -r temp_repo/frontend/dist $PROJECT_DIR/frontend_dist
-                rm -rf temp_repo
-                
-                # 进入项目目录
-                cd $PROJECT_DIR
-                
-                # 安装Python依赖
-                if [ ! -d "venv" ]; then
-                  python3 -m venv venv
-                fi
-                source venv/bin/activate
-                pip install --upgrade pip
-                pip install django djangorestframework djangorestframework-simplejwt django-cors-headers mysqlclient
-                
-                # 配置数据库连接
-                cd backend
-                cat > requirement_manager/local_settings.py << 'EOF'
-            DATABASES = {
-                'default': {
-                    'ENGINE': 'django.db.backends.mysql',
-                    'NAME': 'requirement_manager',
-                    'USER': 'root',
-                    'PASSWORD': '${{ secrets.MYSQL_PASSWORD }}',
-                    'HOST': 'localhost',
-                    'PORT': '3306',
-                    'OPTIONS': {
-                        'charset': 'utf8mb4',
-                    },
-                }
-            }
-            EOF
-                
-                # 执行数据库迁移
-                python manage.py migrate
-                
-                # 收集静态文件
-                python manage.py collectstatic --noinput
-                
-                # 复制前端构建文件
-                rm -rf static/*
-                cp -r ../frontend_dist/* static/
-                
-                # 设置文件权限
-                chown -R www-data:www-data $PROJECT_DIR
-                
-                # 重启Gunicorn服务
-                if [ -f "/etc/systemd/system/requirement_manager.service" ]; then
-                  systemctl daemon-reload
-                  systemctl restart requirement_manager
-                else
-                  echo "Service file not found, please create it manually"
-                fi
-                
-                # 重启Nginx
-                systemctl restart nginx
-                
-                echo "Deployment completed successfully!"
-            SUDO_SCRIPT
-              )"
-            else
-              # 已经是root用户，直接执行部署
-              PROJECT_DIR="/www/wwwroot/requirement_manager"
+            # 项目目录
+            PROJECT_DIR="/www/wwwroot/requirement_manager"
+            
+            # 创建项目目录（如果不存在）
+            mkdir -p $PROJECT_DIR
+            
+            # 备份旧版本
+            if [ -d "$PROJECT_DIR/backend" ]; then
+              mv $PROJECT_DIR $PROJECT_DIR.backup.$(date +%Y%m%d_%H%M%S)
               mkdir -p $PROJECT_DIR
-              
-              if [ -d "$PROJECT_DIR/backend" ]; then
-                mv $PROJECT_DIR $PROJECT_DIR.backup.$(date +%Y%m%d_%H%M%S)
-                mkdir -p $PROJECT_DIR
-              fi
-              
-              cd /tmp
-              git clone https://github.com/freewind2026/RequirementManager.git temp_repo
-              cp -r temp_repo/backend $PROJECT_DIR/
-              cp -r temp_repo/frontend/dist $PROJECT_DIR/frontend_dist
-              rm -rf temp_repo
-              
-              cd $PROJECT_DIR
-              
-              if [ ! -d "venv" ]; then
-                python3 -m venv venv
-              fi
-              source venv/bin/activate
-              pip install --upgrade pip
-              pip install django djangorestframework djangorestframework-simplejwt django-cors-headers mysqlclient
-              
-              cd backend
-              cat > requirement_manager/local_settings.py << 'EOF'
-            DATABASES = {
-                'default': {
-                    'ENGINE': 'django.db.backends.mysql',
-                    'NAME': 'requirement_manager',
-                    'USER': 'root',
-                    'PASSWORD': '${{ secrets.MYSQL_PASSWORD }}',
-                    'HOST': 'localhost',
-                    'PORT': '3306',
-                    'OPTIONS': {
-                        'charset': 'utf8mb4',
-                    },
-                }
-            }
-            EOF
-              
-              python manage.py migrate
-              python manage.py collectstatic --noinput
-              
-              rm -rf static/*
-              cp -r ../frontend_dist/* static/
-              
-              chown -R www-data:www-data $PROJECT_DIR
-              
-              if [ -f "/etc/systemd/system/requirement_manager.service" ]; then
-                systemctl daemon-reload
-                systemctl restart requirement_manager
-              fi
-              
-              systemctl restart nginx
-              
-              echo "Deployment completed successfully!"
             fi
+            
+            # 复制代码到服务器
+            cd /tmp
+            git clone https://github.com/freewind2026/RequirementManager.git temp_repo
+            cp -r temp_repo/backend $PROJECT_DIR/
+            cp -r temp_repo/frontend/dist $PROJECT_DIR/frontend_dist
+            rm -rf temp_repo
+            
+            # 进入项目目录
+            cd $PROJECT_DIR
+            
+            # 安装Python依赖
+            if [ ! -d "venv" ]; then
+              python3 -m venv venv
+            fi
+            source venv/bin/activate
+            pip install --upgrade pip
+            pip install django djangorestframework djangorestframework-simplejwt django-cors-headers mysqlclient
+            
+            # 配置数据库连接
+            cd backend
+            cat > requirement_manager/local_settings.py << EOF
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'requirement_manager',
+        'USER': 'root',
+        'PASSWORD': '$MYSQL_PASSWORD',
+        'HOST': 'localhost',
+        'PORT': '3306',
+        'OPTIONS': {
+            'charset': 'utf8mb4',
+        },
+    }
+}
+EOF
+            
+            # 执行数据库迁移
+            python manage.py migrate
+            
+            # 收集静态文件
+            python manage.py collectstatic --noinput
+            
+            # 复制前端构建文件
+            rm -rf static/*
+            cp -r ../frontend_dist/* static/
+            
+            # 设置文件权限
+            chown -R www-data:www-data $PROJECT_DIR
+            
+            # 重启Gunicorn服务
+            if [ -f "/etc/systemd/system/requirement_manager.service" ]; then
+              systemctl daemon-reload
+              systemctl restart requirement_manager
+            else
+              echo "Service file not found, please create it manually"
+            fi
+            
+            # 重启Nginx
+            systemctl restart nginx
+            
+            echo "Deployment completed successfully!"
