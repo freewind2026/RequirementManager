@@ -76,8 +76,7 @@ export const UserManagementPage = () => {
     e.preventDefault()
     try {
       if (isEditing && currentUser) {
-        const updateData = { ...formData }
-        delete updateData.password
+        const { password, ...updateData } = formData
         await updateUser(currentUser.id, updateData)
       } else {
         await createUser(formData)
