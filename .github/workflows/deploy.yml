@@ -36,18 +36,37 @@ jobs:
           name: frontend-build
           path: frontend/dist
 
+      - name: Upload backend code
+        uses: actions/upload-artifact@v4.3.1
+        with:
+          name: backend-code
+          path: backend
+
   deploy:
     runs-on: ubuntu-latest
     needs: build
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4.2.0
-
       - name: Download frontend build
         uses: actions/download-artifact@v4.1.1
         with:
           name: frontend-build
           path: frontend/dist
+
+      - name: Download backend code
+        uses: actions/download-artifact@v4.1.1
+        with:
+          name: backend-code
+          path: backend
+
+      - name: Copy files to ECS via SCP
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.ECS_HOST }}
+          username: ${{ secrets.ECS_USERNAME }}
+          key: ${{ secrets.ECS_SSH_KEY }}
+          port: ${{ secrets.ECS_PORT || 22 }}
+          source: "backend,frontend/dist"
+          target: "/tmp/deploy"
 
       - name: Deploy to Aliyun ECS via SSH
         uses: appleboy/ssh-action@v1.1.0
@@ -67,11 +86,8 @@ jobs:
               mkdir -p $PROJECT_DIR
             fi
             
-            cd /tmp
-            git clone https://${{ secrets.GH_PAT }}@github.com/freewind2026/RequirementManager.git temp_repo
-            cp -r temp_repo/backend $PROJECT_DIR/
-            cp -r temp_repo/frontend/dist $PROJECT_DIR/frontend_dist
-            rm -rf temp_repo
+            cp -r /tmp/deploy/backend $PROJECT_DIR/
+            cp -r /tmp/deploy/dist $PROJECT_DIR/frontend_dist
             
             cd $PROJECT_DIR
             
@@ -101,5 +117,7 @@ jobs:
             fi
             
             systemctl restart nginx
+            
+            rm -rf /tmp/deploy
             
             echo "Deployment completed successfully!"
