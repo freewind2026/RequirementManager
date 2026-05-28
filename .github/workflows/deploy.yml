@@ -96,6 +96,9 @@ jobs:
             fi
             source venv/bin/activate
             pip install --upgrade pip
+            
+            sudo apt-get update && sudo apt-get install -y default-libmysqlclient-dev pkg-config build-essential python3-dev
+            
             pip install django djangorestframework djangorestframework-simplejwt django-cors-headers mysqlclient
             
             cd backend
