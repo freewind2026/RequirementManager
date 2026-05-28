@@ -87,7 +87,7 @@ jobs:
             fi
             
             cp -r /tmp/deploy/backend $PROJECT_DIR/
-            cp -r /tmp/deploy/dist $PROJECT_DIR/frontend_dist
+            cp -r /tmp/deploy/frontend/dist $PROJECT_DIR/frontend_dist
             
             cd $PROJECT_DIR
             
