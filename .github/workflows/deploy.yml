@@ -93,21 +93,7 @@ jobs:
             
             # 配置数据库连接
             cd backend
-            cat > requirement_manager/local_settings.py << EOF
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'requirement_manager',
-        'USER': 'root',
-        'PASSWORD': '$MYSQL_PASSWORD',
-        'HOST': 'localhost',
-        'PORT': '3306',
-        'OPTIONS': {
-            'charset': 'utf8mb4',
-        },
-    }
-}
-EOF
+            echo "DATABASES = {'default': {'ENGINE': 'django.db.backends.mysql', 'NAME': 'requirement_manager', 'USER': 'root', 'PASSWORD': '$MYSQL_PASSWORD', 'HOST': 'localhost', 'PORT': '3306', 'OPTIONS': {'charset': 'utf8mb4'}}}" > requirement_manager/local_settings.py
             
             # 执行数据库迁移
             python manage.py migrate
