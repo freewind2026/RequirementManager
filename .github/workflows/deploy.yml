@@ -111,6 +111,9 @@ jobs:
             rm -rf $PROJECT_DIR/staticfiles/*
             cp -r $PROJECT_DIR/frontend_dist/* $PROJECT_DIR/staticfiles/
             
+            mkdir -p $PROJECT_DIR/backend/templates
+            cp $PROJECT_DIR/staticfiles/index.html $PROJECT_DIR/backend/templates/
+            
             chown -R www-data:www-data $PROJECT_DIR
             
             echo "[Unit]" > /etc/systemd/system/requirement_manager.service
