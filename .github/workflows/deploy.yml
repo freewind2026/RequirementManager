@@ -113,51 +113,26 @@ jobs:
             
             chown -R www-data:www-data $PROJECT_DIR
             
-            if [ ! -f "/etc/systemd/system/requirement_manager.service" ]; then
-              echo "[Unit]" > /etc/systemd/system/requirement_manager.service
-              echo "Description=Requirement Manager Gunicorn Service" >> /etc/systemd/system/requirement_manager.service
-              echo "After=network.target" >> /etc/systemd/system/requirement_manager.service
-              echo "" >> /etc/systemd/system/requirement_manager.service
-              echo "[Service]" >> /etc/systemd/system/requirement_manager.service
-              echo "User=www-data" >> /etc/systemd/system/requirement_manager.service
-              echo "Group=www-data" >> /etc/systemd/system/requirement_manager.service
-              echo "WorkingDirectory=/www/wwwroot/requirement_manager/backend" >> /etc/systemd/system/requirement_manager.service
-              echo "ExecStart=/www/wwwroot/requirement_manager/venv/bin/gunicorn --workers 3 --bind 127.0.0.1:8000 requirement_manager.wsgi:application" >> /etc/systemd/system/requirement_manager.service
-              echo "Restart=always" >> /etc/systemd/system/requirement_manager.service
-              echo "" >> /etc/systemd/system/requirement_manager.service
-              echo "[Install]" >> /etc/systemd/system/requirement_manager.service
-              echo "WantedBy=multi-user.target" >> /etc/systemd/system/requirement_manager.service
-            fi
+            echo "[Unit]" > /etc/systemd/system/requirement_manager.service
+            echo "Description=Requirement Manager Django Service" >> /etc/systemd/system/requirement_manager.service
+            echo "After=network.target" >> /etc/systemd/system/requirement_manager.service
+            echo "" >> /etc/systemd/system/requirement_manager.service
+            echo "[Service]" >> /etc/systemd/system/requirement_manager.service
+            echo "User=root" >> /etc/systemd/system/requirement_manager.service
+            echo "Group=root" >> /etc/systemd/system/requirement_manager.service
+            echo "WorkingDirectory=/www/wwwroot/requirement_manager/backend" >> /etc/systemd/system/requirement_manager.service
+            echo "ExecStart=/www/wwwroot/requirement_manager/venv/bin/python manage.py runserver 0.0.0.0:80" >> /etc/systemd/system/requirement_manager.service
+            echo "Restart=always" >> /etc/systemd/system/requirement_manager.service
+            echo "" >> /etc/systemd/system/requirement_manager.service
+            echo "[Install]" >> /etc/systemd/system/requirement_manager.service
+            echo "WantedBy=multi-user.target" >> /etc/systemd/system/requirement_manager.service
             
             systemctl daemon-reload
             systemctl enable requirement_manager
+            systemctl stop nginx || true
             systemctl restart requirement_manager
-            
-            echo "server {" > /etc/nginx/sites-available/requirement_manager
-            echo "    listen 80;" >> /etc/nginx/sites-available/requirement_manager
-            echo "    server_name _;" >> /etc/nginx/sites-available/requirement_manager
-            echo "" >> /etc/nginx/sites-available/requirement_manager
-            echo "    root /www/wwwroot/requirement_manager/staticfiles;" >> /etc/nginx/sites-available/requirement_manager
-            echo "    index index.html;" >> /etc/nginx/sites-available/requirement_manager
-            echo "" >> /etc/nginx/sites-available/requirement_manager
-            echo "    location / {" >> /etc/nginx/sites-available/requirement_manager
-            echo "        try_files \$uri \$uri/ /index.html;" >> /etc/nginx/sites-available/requirement_manager
-            echo "    }" >> /etc/nginx/sites-available/requirement_manager
-            echo "" >> /etc/nginx/sites-available/requirement_manager
-            echo "    location /api/ {" >> /etc/nginx/sites-available/requirement_manager
-            echo "        proxy_pass http://127.0.0.1:8000;" >> /etc/nginx/sites-available/requirement_manager
-            echo "        proxy_set_header Host \$host;" >> /etc/nginx/sites-available/requirement_manager
-            echo "        proxy_set_header X-Real-IP \$remote_addr;" >> /etc/nginx/sites-available/requirement_manager
-            echo "        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;" >> /etc/nginx/sites-available/requirement_manager
-            echo "        proxy_set_header X-Forwarded-Proto \$scheme;" >> /etc/nginx/sites-available/requirement_manager
-            echo "    }" >> /etc/nginx/sites-available/requirement_manager
-            echo "}" >> /etc/nginx/sites-available/requirement_manager
-            
-            rm -f /etc/nginx/sites-enabled/default
-            ln -sf /etc/nginx/sites-available/requirement_manager /etc/nginx/sites-enabled/
-            
-            nginx -t && systemctl restart nginx
             
             rm -rf /tmp/deploy
             
             echo "Deployment completed successfully!"
+            echo "Access at: http://${{ secrets.ECS_HOST }}/"
