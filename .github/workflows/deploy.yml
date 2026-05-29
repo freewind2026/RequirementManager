@@ -107,19 +107,62 @@ jobs:
             python manage.py migrate
             python manage.py collectstatic --noinput
             
+            # 创建 staticfiles 目录（确保存在）
+            mkdir -p staticfiles
             rm -rf staticfiles/*
             cp -r ../frontend_dist/* staticfiles/
             
             chown -R www-data:www-data $PROJECT_DIR
             
-            if [ -f "/etc/systemd/system/requirement_manager.service" ]; then
-              systemctl daemon-reload
-              systemctl restart requirement_manager
-            else
-              echo "Service file not found, please create it manually"
+            # 创建 Gunicorn 服务配置文件（如果不存在）
+            if [ ! -f "/etc/systemd/system/requirement_manager.service" ]; then
+              echo "[Unit]
+Description=Requirement Manager Gunicorn Service
+After=network.target
+
+[Service]
+User=www-data
+Group=www-data
+WorkingDirectory=$PROJECT_DIR/backend
+ExecStart=$PROJECT_DIR/venv/bin/gunicorn --workers 3 --bind 127.0.0.1:8000 requirement_manager.wsgi:application
+Restart=always
+
+[Install]
+WantedBy=multi-user.target" > /etc/systemd/system/requirement_manager.service
             fi
             
-            systemctl restart nginx
+            # 重启服务
+            systemctl daemon-reload
+            systemctl enable requirement_manager
+            systemctl restart requirement_manager
+            
+            # 创建/更新 Nginx 配置
+            echo "server {
+    listen 80;
+    server_name _;
+
+    root $PROJECT_DIR/staticfiles;
+    index index.html;
+
+    location / {
+        try_files \$uri \$uri/ /index.html;
+    }
+
+    location /api/ {
+        proxy_pass http://127.0.0.1:8000;
+        proxy_set_header Host \$host;
+        proxy_set_header X-Real-IP \$remote_addr;
+        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto \$scheme;
+    }
+}" > /etc/nginx/sites-available/requirement_manager
+            
+            # 启用 Nginx 配置
+            rm -f /etc/nginx/sites-enabled/default
+            ln -sf /etc/nginx/sites-available/requirement_manager /etc/nginx/sites-enabled/
+            
+            # 测试并重启 Nginx
+            nginx -t && systemctl restart nginx
             
             rm -rf /tmp/deploy
             
