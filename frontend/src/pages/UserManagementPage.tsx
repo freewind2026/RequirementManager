@@ -63,7 +63,6 @@ export const UserManagementPage = () => {
     setFormData({
       email: '',
       username: '',
-      name: '',
       password: '',
       role: 'developer',
     })
@@ -259,7 +258,7 @@ export const UserManagementPage = () => {
                 <input
                   type="text"
                   value={formData.username}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                  onChange={(e) => setFormData({ ...formData, username: e.target.value })}
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary/50 focus:border-primary outline-none"
                   required
                 />
