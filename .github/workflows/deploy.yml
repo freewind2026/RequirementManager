@@ -107,9 +107,9 @@ jobs:
             python manage.py migrate
             python manage.py collectstatic --noinput
             
-            mkdir -p staticfiles
-            rm -rf staticfiles/*
-            cp -r ../frontend_dist/* staticfiles/
+            mkdir -p $PROJECT_DIR/staticfiles
+            rm -rf $PROJECT_DIR/staticfiles/*
+            cp -r $PROJECT_DIR/frontend_dist/* $PROJECT_DIR/staticfiles/
             
             chown -R www-data:www-data $PROJECT_DIR
             
