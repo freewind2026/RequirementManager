@@ -114,48 +114,44 @@ jobs:
             chown -R www-data:www-data $PROJECT_DIR
             
             if [ ! -f "/etc/systemd/system/requirement_manager.service" ]; then
-              cat > /etc/systemd/system/requirement_manager.service << 'EOF'
-[Unit]
-Description=Requirement Manager Gunicorn Service
-After=network.target
-
-[Service]
-User=www-data
-Group=www-data
-WorkingDirectory=/www/wwwroot/requirement_manager/backend
-ExecStart=/www/wwwroot/requirement_manager/venv/bin/gunicorn --workers 3 --bind 127.0.0.1:8000 requirement_manager.wsgi:application
-Restart=always
-
-[Install]
-WantedBy=multi-user.target
-EOF
+              echo "[Unit]" > /etc/systemd/system/requirement_manager.service
+              echo "Description=Requirement Manager Gunicorn Service" >> /etc/systemd/system/requirement_manager.service
+              echo "After=network.target" >> /etc/systemd/system/requirement_manager.service
+              echo "" >> /etc/systemd/system/requirement_manager.service
+              echo "[Service]" >> /etc/systemd/system/requirement_manager.service
+              echo "User=www-data" >> /etc/systemd/system/requirement_manager.service
+              echo "Group=www-data" >> /etc/systemd/system/requirement_manager.service
+              echo "WorkingDirectory=/www/wwwroot/requirement_manager/backend" >> /etc/systemd/system/requirement_manager.service
+              echo "ExecStart=/www/wwwroot/requirement_manager/venv/bin/gunicorn --workers 3 --bind 127.0.0.1:8000 requirement_manager.wsgi:application" >> /etc/systemd/system/requirement_manager.service
+              echo "Restart=always" >> /etc/systemd/system/requirement_manager.service
+              echo "" >> /etc/systemd/system/requirement_manager.service
+              echo "[Install]" >> /etc/systemd/system/requirement_manager.service
+              echo "WantedBy=multi-user.target" >> /etc/systemd/system/requirement_manager.service
             fi
             
             systemctl daemon-reload
             systemctl enable requirement_manager
             systemctl restart requirement_manager
             
-            cat > /etc/nginx/sites-available/requirement_manager << 'EOF'
-server {
-    listen 80;
-    server_name _;
-
-    root /www/wwwroot/requirement_manager/staticfiles;
-    index index.html;
-
-    location / {
-        try_files $uri $uri/ /index.html;
-    }
-
-    location /api/ {
-        proxy_pass http://127.0.0.1:8000;
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto $scheme;
-    }
-}
-EOF
+            echo "server {" > /etc/nginx/sites-available/requirement_manager
+            echo "    listen 80;" >> /etc/nginx/sites-available/requirement_manager
+            echo "    server_name _;" >> /etc/nginx/sites-available/requirement_manager
+            echo "" >> /etc/nginx/sites-available/requirement_manager
+            echo "    root /www/wwwroot/requirement_manager/staticfiles;" >> /etc/nginx/sites-available/requirement_manager
+            echo "    index index.html;" >> /etc/nginx/sites-available/requirement_manager
+            echo "" >> /etc/nginx/sites-available/requirement_manager
+            echo "    location / {" >> /etc/nginx/sites-available/requirement_manager
+            echo "        try_files \$uri \$uri/ /index.html;" >> /etc/nginx/sites-available/requirement_manager
+            echo "    }" >> /etc/nginx/sites-available/requirement_manager
+            echo "" >> /etc/nginx/sites-available/requirement_manager
+            echo "    location /api/ {" >> /etc/nginx/sites-available/requirement_manager
+            echo "        proxy_pass http://127.0.0.1:8000;" >> /etc/nginx/sites-available/requirement_manager
+            echo "        proxy_set_header Host \$host;" >> /etc/nginx/sites-available/requirement_manager
+            echo "        proxy_set_header X-Real-IP \$remote_addr;" >> /etc/nginx/sites-available/requirement_manager
+            echo "        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;" >> /etc/nginx/sites-available/requirement_manager
+            echo "        proxy_set_header X-Forwarded-Proto \$scheme;" >> /etc/nginx/sites-available/requirement_manager
+            echo "    }" >> /etc/nginx/sites-available/requirement_manager
+            echo "}" >> /etc/nginx/sites-available/requirement_manager
             
             rm -f /etc/nginx/sites-enabled/default
             ln -sf /etc/nginx/sites-available/requirement_manager /etc/nginx/sites-enabled/
