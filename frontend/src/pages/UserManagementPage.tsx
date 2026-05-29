@@ -183,7 +183,7 @@ export const UserManagementPage = () => {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <span className="text-sm text-gray-500">
-                        {new Date(user.created_at).toLocaleDateString()}
+                        {new Date(user.date_joined).toLocaleDateString()}
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">

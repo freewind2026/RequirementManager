@@ -4,7 +4,7 @@ from .models import User, Project, ProjectGroup, ProjectGroupMember, Requirement
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ['id', 'email', 'username', 'role', 'created_at']
+        fields = ['id', 'email', 'username', 'role', 'date_joined']
         read_only_fields = ['id', 'created_at']
 
 class UserCreateSerializer(serializers.ModelSerializer):

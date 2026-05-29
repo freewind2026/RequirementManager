@@ -21,7 +21,7 @@ export const LoginPage = () => {
         email,
         username: email.split('@')[0],
         role: 'admin' as const,
-        created_at: new Date().toISOString(),
+        date_joined: new Date().toISOString(),
       }
       authLogin(response.access, userInfo)
       window.location.href = '/'

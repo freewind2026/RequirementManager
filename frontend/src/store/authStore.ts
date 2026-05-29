@@ -14,7 +14,7 @@ export interface User {
   email: string
   username: string
   role: 'admin' | 'manager' | 'developer'
-  created_at: string
+  date_joined: string
 }
 
 export const useAuthStore = create<AuthStore>((set) => ({

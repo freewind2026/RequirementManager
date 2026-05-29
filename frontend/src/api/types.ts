@@ -3,7 +3,7 @@ export interface User {
   username: string
   email: string
   role: 'admin' | 'manager' | 'developer'
-  created_at: string
+  date_joined: string
 }
 
 export interface Project {
