@@ -4,7 +4,7 @@ import { login } from '@/api/auth'
 import { useAuthStore } from '@/store/authStore'
 
 export const LoginPage = () => {
-  const [email, setEmail] = useState('')
+  const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
   const [error, setError] = useState('')
@@ -15,19 +15,19 @@ export const LoginPage = () => {
     setError('')
     
     try {
-      const response = await login(email, password)
+      const response = await login(username, password)
       const userInfo = {
         id: 1,
-        email,
-        username: email.split('@')[0],
-        name: email.split('@')[0],
+        email: username.includes('@') ? username : `${username}@example.com`,
+        username,
+        name: username.includes('@') ? username.split('@')[0] : username,
         role: 'admin' as const,
         created_at: new Date().toISOString(),
       }
       authLogin(response.access, userInfo)
       window.location.href = '/'
     } catch (err) {
-      setError('登录失败，请检查邮箱和密码')
+      setError('登录失败，请检查用户名和密码')
     }
   }
 
@@ -50,15 +50,15 @@ export const LoginPage = () => {
         
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">邮箱</label>
+            <label className="block text-sm font-medium text-gray-700 mb-2">用户名</label>
             <div className="relative">
               <UserIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
               <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                type="text"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
                 className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary/50 focus:border-primary outline-none transition-all"
-                placeholder="请输入邮箱"
+                placeholder="请输入用户名"
                 required
               />
             </div>
@@ -96,7 +96,7 @@ export const LoginPage = () => {
         
         <div className="mt-6 text-center">
           <p className="text-sm text-gray-500">
-            默认账户：admin@example.com / password
+            默认账户：admin / password
           </p>
         </div>
       </div>
