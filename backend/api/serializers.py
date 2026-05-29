@@ -4,7 +4,7 @@ from .models import User, Project, ProjectGroup, ProjectGroupMember, Requirement
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ['id', 'email', 'username', 'name', 'role', 'created_at']
+        fields = ['id', 'email', 'username', 'role', 'created_at']
         read_only_fields = ['id', 'created_at']
 
 class UserCreateSerializer(serializers.ModelSerializer):
@@ -12,14 +12,13 @@ class UserCreateSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = User
-        fields = ['id', 'email', 'username', 'name', 'password', 'role']
+        fields = ['id', 'email', 'username', 'password', 'role']
         read_only_fields = ['id']
 
     def create(self, validated_data):
         user = User.objects.create_user(
             email=validated_data['email'],
             username=validated_data['username'],
-            name=validated_data['name'],
             password=validated_data['password'],
             role=validated_data.get('role', 'developer')
         )

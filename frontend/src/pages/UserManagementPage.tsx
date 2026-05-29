@@ -13,7 +13,6 @@ export const UserManagementPage = () => {
   const [formData, setFormData] = useState({
     email: '',
     username: '',
-    name: '',
     password: '',
     role: 'developer' as 'admin' | 'manager' | 'developer',
   })
@@ -41,7 +40,6 @@ export const UserManagementPage = () => {
       setFormData({
         email: user.email,
         username: user.username,
-        name: user.name,
         password: '',
         role: user.role,
       })
@@ -51,7 +49,6 @@ export const UserManagementPage = () => {
       setFormData({
         email: '',
         username: '',
-        name: '',
         password: '',
         role: 'developer',
       })
@@ -261,7 +258,7 @@ export const UserManagementPage = () => {
                 <label className="block text-sm font-medium text-gray-700 mb-2">姓名</label>
                 <input
                   type="text"
-                  value={formData.name}
+                  value={formData.username}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary/50 focus:border-primary outline-none"
                   required

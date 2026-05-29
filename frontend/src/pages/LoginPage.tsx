@@ -20,7 +20,6 @@ export const LoginPage = () => {
         id: 1,
         email,
         username: email.split('@')[0],
-        name: email.split('@')[0],
         role: 'admin' as const,
         created_at: new Date().toISOString(),
       }
